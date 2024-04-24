@@ -1,0 +1,71 @@
+import time
+import signal
+import logging
+import sys
+
+# Configure logging
+logging.basicConfig(filename='log_monitor.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
+
+# Define the log file to monitor
+log_file_path = 'log-monitor-py'
+
+# Function to handle Ctrl+C signal
+def signal_handler(sig, frame):
+    print('\nExiting...')
+    sys.exit(0)
+
+# Function to monitor log file
+def monitor_log_file():
+    try:
+        with open(log_file_path, 'r') as log_file:
+            # Move the pointer to the end of the file
+            log_file.seek(0, 2)
+            while True:
+                # Read new lines continuously
+                new_line = log_file.readline()
+                if new_line:
+                    print(new_line.strip())
+                    logging.info(new_line.strip())
+                time.sleep(0.1)
+    except FileNotFoundError:
+        print(f"Error: Log file '{log_file_path}' not found.")
+        logging.error(f"Log file '{log_file_path}' not found.")
+        sys.exit(1)
+
+# Function to perform basic log analysis
+def analyze_log():
+    try:
+        with open(log_file_path, 'r') as log_file:
+            log_content = log_file.read()
+            # Example: Count occurrences of 'ERROR' keyword
+            error_count = log_content.count('ERROR')
+            print(f"Number of ERROR occurrences: {error_count}")
+            logging.info(f"Number of ERROR occurrences: {error_count}")
+    except FileNotFoundError:
+        print(f"Error: Log file '{log_file_path}' not found.")
+        logging.error(f"Log file '{log_file_path}' not found.")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    # Set up signal handler for Ctrl+C
+    signal.signal(signal.SIGINT, signal_handler)
+
+    while True:
+        print("Choose an option:")
+        print("1. Monitor log file in real-time")
+        print("2. Analyze log file")
+        print("3. Exit")
+
+        choice = input("Enter your choice: ")
+
+        if choice == '1':
+            print("Monitoring log file in real-time. Press Ctrl+C to stop.")
+            monitor_log_file()
+        elif choice == '2':
+            analyze_log()
+        elif choice == '3':
+            print("Exiting...")
+            sys.exit(0)
+        else:
+            print("Invalid choice. Please enter 1, 2, or 3.")
+
